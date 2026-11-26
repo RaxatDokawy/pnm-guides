@@ -5,11 +5,6 @@ on:
     - cron: "0 4 * * 1"   # Понедельник 09:00 (UTC+5)
     - cron: "0 4 * * 5"   # Пятница 09:00 (UTC+5)
   workflow_dispatch:
-    inputs:
-      file:
-        description: "какой пост отправить (например posts/tg_post2.json)"
-        required: true
-        default: "posts/tg_post2.json"
 
 permissions:
   contents: write
@@ -60,12 +55,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Send given file
-        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }}, FILE: ${{ inputs.file }} }
+      - name: Send current test file
+        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }} }
         run: |
           python - <<'EOF'
           import json, os, urllib.request
-          data = open(os.environ["FILE"], encoding="utf-8").read()
+          data = open("posts/test.json", encoding="utf-8").read()
           body = json.dumps(json.loads(data)).encode()
           req = urllib.request.Request(
               f"https://api.telegram.org/bot{os.environ['TOKEN']}/sendMessage",
