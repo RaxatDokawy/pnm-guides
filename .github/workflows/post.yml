@@ -1,0 +1,74 @@
+name: Scheduled channel posts
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"   # Понедельник 09:00 (UTC+5)
+    - cron: "0 4 * * 5"   # Пятница 09:00 (UTC+5)
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "какой пост отправить (например posts/tg_post2.json)"
+        required: true
+        default: "posts/tg_post2.json"
+
+permissions:
+  contents: write
+
+jobs:
+  monday:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 4 * * 1'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send Monday post and remove from queue
+        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }} }
+        run: |
+          python - <<'EOF'
+          import json, os, urllib.request
+          data = open("posts/tg_post2.json", encoding="utf-8").read()
+          body = json.dumps(json.loads(data)).encode()
+          req = urllib.request.Request(
+              f"https://api.telegram.org/bot{os.environ['TOKEN']}/sendMessage",
+              data=body, headers={"Content-Type": "application/json"})
+          print(urllib.request.urlopen(req, timeout=30).read().decode()[:120])
+          EOF
+      - name: Remove sent file
+        run: git rm -q posts/tg_post2.json && git commit -qm "post sent [skip ci]" && git push -q
+
+  friday:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 4 * * 5'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send Friday post and remove from queue
+        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }} }
+        run: |
+          python - <<'EOF'
+          import json, os, urllib.request
+          data = open("posts/tg_post3.json", encoding="utf-8").read()
+          body = json.dumps(json.loads(data)).encode()
+          req = urllib.request.Request(
+              f"https://api.telegram.org/bot{os.environ['TOKEN']}/sendMessage",
+              data=body, headers={"Content-Type": "application/json"})
+          print(urllib.request.urlopen(req, timeout=30).read().decode()[:120])
+          EOF
+      - name: Remove sent file
+        run: git rm -q posts/tg_post3.json && git commit -qm "post sent [skip ci]" && git push -q
+
+  manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send given file
+        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }}, FILE: ${{ inputs.file }} }
+        run: |
+          python - <<'EOF'
+          import json, os, urllib.request
+          data = open(os.environ["FILE"], encoding="utf-8").read()
+          body = json.dumps(json.loads(data)).encode()
+          req = urllib.request.Request(
+              f"https://api.telegram.org/bot{os.environ['TOKEN']}/sendMessage",
+              data=body, headers={"Content-Type": "application/json"})
+          print(urllib.request.urlopen(req, timeout=30).read().decode()[:120])
+          EOF
