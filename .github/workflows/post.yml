@@ -16,7 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Send Monday post and remove from queue
-        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }} }
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }}
         run: |
           python - <<'EOF'
           import json, os, urllib.request
@@ -36,7 +37,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Send Friday post and remove from queue
-        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }} }
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }}
         run: |
           python - <<'EOF'
           import json, os, urllib.request
@@ -56,7 +58,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Send current test file
-        env: { TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }} }
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN_RU }}
         run: |
           python - <<'EOF'
           import json, os, urllib.request
